@@ -634,7 +634,8 @@ def sanitize_filename(s, restricted=False, is_id=NO_DEFAULT):
             return '\0_\0-' if restricted else '\0 \0-'
         elif char in '\\/|*<>':
             return '\0_'
-        if restricted and (char in '!&\'()[]{}$;`^,#' or char.isspace() or ord(char) > 127):
+        # MN: allow ' ' and '#'
+        if restricted and (char in '!&\'()[]{}$;`^,' or ( char != ' ' and char.isspace()) or ord(char) > 127):
             return '' if unicodedata.category(char)[0] in 'CM' else '\0_'
         return char
 
