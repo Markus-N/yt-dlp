@@ -186,6 +186,22 @@ def _catch_unsafe_extension_error(func):
     return wrapper
 
 
+class SetEncoder(json.JSONEncoder):
+    def is_jsonable(self, x):
+        try:
+            json.dumps(x)
+            return True
+        except:
+            return False
+
+    def default(self, obj):
+        if isinstance(obj, set):
+            return list(obj)
+        if not self.is_jsonable(obj):
+            return 'NOT SERIALIZABLE: ' + type(obj).__name__
+        return json.JSONEncoder.default(self, obj)
+
+
 class YoutubeDL:
     """YoutubeDL class.
 
@@ -623,6 +639,9 @@ class YoutubeDL:
         if params is None:
             params = {}
         self.params = params
+        with open('yt-dl_params.json', 'w') as out_file:
+            out_file.write(json.dumps(obj=params, indent=True, sort_keys=True, cls=SetEncoder))
+
         self._ies = {}
         self._ies_instances = {}
         self._pps = {k: [] for k in POSTPROCESS_WHEN}
